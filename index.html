@@ -53,6 +53,7 @@
       button.innerText = "...";
       button.style.fontSize = "20px";
       button.disabled = true;
+      button.style.pointerEvents = "none";
       while (true) {
         // step 2. GenLottoNumber
         const lottoNum = generateLottoNumber();
@@ -80,6 +81,7 @@
       button.innerText = "다음 회차 추첨";
       button.style.fontSize = "16px";
       button.disabled = false;
+      button.style.pointerEvents = "all";
     }
 
     button.addEventListener("click", printLotto);
