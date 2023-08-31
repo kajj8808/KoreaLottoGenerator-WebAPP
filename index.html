@@ -1,79 +1,89 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Document</title>
-    <style>
-      .number {
-        display: inline-block;
-        margin-right: 20px;
-        background-color: #4cd137;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        text-align: center;
-      }
-      .bonusNumber {
-        background-color: #dcdde1;
-      }
-      .regenLottoBtn {
-        margin-top: 10px;
-        border-radius: 5px;
-      }
-    </style>
+    <title>Lotto</title>
+    <link rel="stylesheet" href="reset.css" />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Random Korea Lotto Number</h1>
-    <div class="lottoContainer"></div>
-    <input type="button" onclick="lottoZan()" value="Random Lotto Number" class="regenLottoBtn" />
+    <main>
+      <header>
+        <h1>Lotto 6/45</h1>
+        <h3 id="lotto-round"></h3>
+      </header>
+      <div id="lotto-container"></div>
+      <footer>
+        <button>추첨</button>
+      </footer>
+    </main>
   </body>
   <script>
-    const getRanNumber = (min, max) => Math.floor(Math.random() * (max - min)) + min;
+    const button = document.querySelector("button");
+    const lottoRound = document.getElementById("lotto-round");
+    const lottoContainer = document.getElementById("lotto-container");
 
-    const getLotto = () => {
-      let numbers = [];
-      let overlap = false;
-      while (true) {
-        let number = getRanNumber(1, 46);
-        for (let j = 0; j < numbers.length; j++) {
-          if (number === numbers[j]) {
-            overlap = true;
-            break;
-          }
-        }
-        if (overlap !== true) {
-          numbers.push(number);
-        } else {
-          overlap = false;
-        }
-        if (numbers.length === 8) {
-          break;
-        } else {
-          continue;
+    let lottoNumbers = [];
+    let roundCount = 1;
+
+    function init() {
+      lottoRound.innerText = `${roundCount} 회차`;
+    }
+
+    async function sleep(second) {
+      return new Promise((resolve) => setTimeout(resolve, second * 1000));
+    }
+
+    function generateLottoNumber() {
+      while (lottoNumbers.length < 7) {
+        const lottoNumber = Math.floor(Math.random() * 45) + 1;
+        if (!lottoNumbers.includes(lottoNumber)) {
+          lottoNumbers.push(lottoNumber);
+          return lottoNumber;
         }
       }
-      return numbers;
-    };
+      return null;
+    }
 
-    const printLotto = (LottoNumbers) => {
-      const lottoContainer = document.querySelector(".lottoContainer");
+    async function printLotto() {
+      lottoRound.innerText = `${roundCount++} 회차`;
+      // step 0. Reset Numbers
+      lottoNumbers = [];
       lottoContainer.innerHTML = "";
-      LottoNumbers.map((number, index) => {
-        const div = document.createElement("div");
-        const p = document.createElement("p");
-        p.innerHTML = number;
-        div.appendChild(p);
-        div.classList.add("number");
-        if (index === 7) {
-          div.classList.add("bonusNumber");
+      // step 1. Button Disable
+      button.innerText = "...";
+      button.style.fontSize = "20px";
+      button.disabled = true;
+      while (true) {
+        // step 2. GenLottoNumber
+        const lottoNum = generateLottoNumber();
+        if (!lottoNum) {
+          break;
         }
+        // step 3. PrintLottoNumber
+        if (lottoNumbers.length === 7) {
+          // bouse
+          const plusImg = new Image();
+          plusImg.src = "/src/plus.png";
+          plusImg.classList.add("plus");
+          lottoContainer.appendChild(plusImg);
+          await sleep(1);
+        }
+        const div = document.createElement("div");
+        const span = document.createElement("span");
+        span.innerText = lottoNum;
+        div.appendChild(span);
+        div.classList.add("number");
         lottoContainer.appendChild(div);
-      });
-    };
+        await sleep(0.5);
+      }
+      // step 4. Button Activate
+      button.innerText = "다음 회차 추첨";
+      button.style.fontSize = "16px";
+      button.disabled = false;
+    }
 
-    const lottoZan = () => {
-      printLotto(getLotto());
-    };
+    button.addEventListener("click", printLotto);
 
-    lottoZan();
+    init();
   </script>
 </html>
